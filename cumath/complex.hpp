@@ -52,92 +52,95 @@ namespace cumath {
   protected:
     T x[2];
   public:
-    __inline__ __host__ __device__
+    typedef T value_type;
+    CUMATH_HOST_DEVICE
     complex_base() {
+#if !(defined __CUDACC__)
       x[0]=T(0);
       x[1]=T(0);
+#endif
     }
-    __inline__ __host__ __device__
+    CUMATH_HOST_DEVICE
     complex_base(const T &r) {
       x[0]=r;
       x[1]=0;
     }
-    __inline__ __host__ __device__
+    CUMATH_HOST_DEVICE
     complex_base(const T &r, const T &i) {
       x[0]=r;
       x[1]=i;
     }
-    __inline__ __host__ __device__
+    CUMATH_HOST_DEVICE
     T real() const {
       return x[0];
     }
     void real(const T &r) {
       x[0]=r;
     }
-    __inline__ __host__ __device__
+    CUMATH_HOST_DEVICE
     T imag() const {
       return x[1];
     }
     void imag(const T &i) {
       x[1]=i;
     }
-    __inline__ __host__ __device__
+    CUMATH_HOST_DEVICE
     complex_base & operator=(const T &val) {
       x[0]=val;
       x[1]=0;
       return *this;
     }
-    __inline__ __host__ __device__
+    CUMATH_HOST_DEVICE
     complex_base & operator=(const complex_base &val) {
       x[0]=val.x[0];
       x[1]=val.x[1];
       return *this;
     }
-    __inline__ __host__ __device__
+    CUMATH_HOST_DEVICE
     complex_base & operator+=(const T &val) {
       x[0]+=val;
       return *this;
     }
     template<typename T2>
-    __inline__ __host__ __device__
+    CUMATH_HOST_DEVICE
     complex_base & operator+=(const complex_base<T2> &val) {
       x[0]+=val.real();
       x[1]+=val.imag();
       return *this;
     }
-    __inline__ __host__ __device__
+    CUMATH_HOST_DEVICE
     complex_base & operator-=(const T &val) {
       x[0]-=val;
       return *this;
     }
     template<typename T2>
-    __inline__ __host__ __device__
+    CUMATH_HOST_DEVICE
     complex_base & operator-=(const complex_base<T2> &val) {
       x[0]-=val.real();
       x[1]-=val.imag();
       return *this;
     }
-    __inline__ __host__ __device__
+    CUMATH_HOST_DEVICE
     complex_base & operator*=(const T &val) {
       x[0]*=val;
       x[1]*=val;
       return *this;
     }
     template<typename T2>
-    __inline__ __host__ __device__
+    CUMATH_HOST_DEVICE
     complex_base & operator*=(const complex_base<T2> &val) {
       *this=complex_base(real()*val.real()-imag()*val.imag(),
 			 imag()*val.real()+real()*val.imag());
       return *this;
     }
-    __inline__ __host__ __device__
+    CUMATH_HOST_DEVICE
     complex_base & operator/=(const T &val) {
       x[0]/=val;
       x[1]/=val;
       return *this;
     }
     template<typename T2>
-    __inline__ __host__ __device__
+    CUMATH_HOST_DEVICE
     complex_base & operator/=(const complex_base<T2> &val) {
       if (abs(real())>abs(val.imag())) {
 	T norm=val.real()+val.imag()*val.imag()/val.real();
@@ -154,64 +157,64 @@ namespace cumath {
   };
 
   template<typename T> 
-  __inline__ __host__ __device__
+  CUMATH_HOST_DEVICE
   complex_base<T> operator+(const complex_base<T> &lhs, const complex_base<T> &rhs) {
     return complex_base<T>(lhs.real()+rhs.real(),
 			   lhs.imag()+rhs.imag());
   }
   template<typename T> 
-  __inline__ __host__ __device__
+  CUMATH_HOST_DEVICE
   complex_base<T> operator+(const complex_base<T> &lhs, const T &val)  {
     return complex_base<T>(lhs.real()+val,
 			   lhs.imag());
   }
   template<typename T> 
-  __inline__ __host__ __device__
+  CUMATH_HOST_DEVICE
   complex_base<T> operator+(const T& val, const complex_base<T> &rhs) {
     return complex_base<T>(val+rhs.real(),
 			   rhs.imag());
   }
 
   template<typename T> 
-  __inline__ __host__ __device__
+  CUMATH_HOST_DEVICE
   complex_base<T> operator-(const complex_base<T> &lhs, const complex_base<T> &rhs) {
     return complex_base<T>(lhs.real()-rhs.real(),
 			   lhs.imag()-rhs.imag());
   }
   template<typename T> 
-  __inline__ __host__ __device__
+  CUMATH_HOST_DEVICE
   complex_base<T> operator-(const complex_base<T> &lhs, const T &val)  {
     return complex_base<T>(lhs.real()-val,
 			   lhs.imag());
   }
   template<typename T> 
-  __inline__ __host__ __device__
+  CUMATH_HOST_DEVICE
   complex_base<T> operator-(const T& val, const complex_base<T> &rhs) {
     return complex_base<T>(val-rhs.real(),
 			   rhs.imag());
   }
 
   template<typename T> 
-  __inline__ __host__ __device__
+  CUMATH_HOST_DEVICE
   complex_base<T> operator*(const complex_base<T> &lhs, const complex_base<T> &rhs) {
     return complex_base<T>(lhs.real()*rhs.real()-lhs.imag()*rhs.imag(),
 			   lhs.imag()*rhs.real()+lhs.real()*rhs.imag());
   }
   template<typename T> 
-  __inline__ __host__ __device__
+  CUMATH_HOST_DEVICE
   complex_base<T> operator*(const complex_base<T> &lhs, const T &val)  {
     return complex_base<T>(lhs.real()*val,
 			   lhs.imag()*val);
   }
   template<typename T> 
-  __inline__ __host__ __device__
+  CUMATH_HOST_DEVICE
   complex_base<T> operator*(const T& val, const complex_base<T> &rhs) {
     return complex_base<T>(val*rhs.real(),
 			   val*rhs.imag());
   }
 
   template<typename T> 
-  __inline__ __host__ __device__
+  CUMATH_HOST_DEVICE
   complex_base<T> operator/(const complex_base<T> &lhs, const complex_base<T> &rhs) {
     if (abs(rhs.real())>abs(rhs.imag())) {
       T norm=rhs.real()+rhs.imag()*rhs.imag()/rhs.real();
@@ -224,140 +227,140 @@ namespace cumath {
     }
   }
   template<typename T> 
-  __inline__ __host__ __device__
+  CUMATH_HOST_DEVICE
   complex_base<T> operator/(const complex_base<T> &lhs, const T &val)  {
     return complex_base<T>(lhs.real()/val,
 			   lhs.imag()/val);
   }
   template<typename T> 
-  __inline__ __host__ __device__
+  CUMATH_HOST_DEVICE
   complex_base<T> operator/(const T& val, const complex_base<T> &rhs) {
     return complex_base<T>(val)/rhs;
   }
 
   template<typename T> 
-  __inline__ __host__ __device__
+  CUMATH_HOST_DEVICE
   complex_base<T> operator+(const complex_base<T> &rhs) {
     return rhs;
   }
   template<typename T> 
-  __inline__ __host__ __device__
+  CUMATH_HOST_DEVICE
   complex_base<T> operator-(const complex_base<T> &rhs) {
     return complex_base<T>(-rhs.real(), -rhs.imag());
   }
 
   template<typename T> 
-  __inline__ __host__ __device__
+  CUMATH_HOST_DEVICE
   bool operator==(const complex_base<T> &lhs, const complex_base<T> &rhs) {
     return lhs.real()==rhs.real() and lhs.imag()==rhs.imag();
   }
   template<typename T> 
-  __inline__ __host__ __device__
+  CUMATH_HOST_DEVICE
   bool operator==(const complex_base<T> &lhs, const T& val) {
     return lhs.real()==val and lhs.imag()==T(0);
   }
   template<typename T> 
-  __inline__ __host__ __device__
+  CUMATH_HOST_DEVICE
   bool operator==(const T& val, const complex_base<T> &rhs) {
     return val==rhs.real() and T(0)==rhs.imag();
   }
 
   template<typename T> 
-  __inline__ __host__ __device__
+  CUMATH_HOST_DEVICE
   bool operator!=(const complex_base<T> &lhs, const complex_base<T> &rhs) {
     return lhs.real()!=rhs.real() or lhs.imag()!=rhs.imag();
   }
   template<typename T> 
-  __inline__ __host__ __device__
+  CUMATH_HOST_DEVICE
   bool operator!=(const complex_base<T> &lhs, const T& val) {
     return lhs.real()!=val or lhs.imag()!=T(0);
   }
   template<typename T> 
-  __inline__ __host__ __device__
+  CUMATH_HOST_DEVICE
   bool operator!=(const T& val, const complex_base<T> &rhs) {
     return val!=rhs.real() or T(0)!=rhs.imag();
   }
 
   template<typename T> 
-  __inline__ __host__ __device__
+  CUMATH_HOST_DEVICE
   T real(const complex_base<T> &val) {
     return val.real();
   }
 
   template<typename T> 
-  __inline__ __host__ __device__
+  CUMATH_HOST_DEVICE
   T imag(const complex_base<T> &val) {
     return val.imag();
   }
 
   template<typename T> 
-  __inline__ __host__ __device__
+  CUMATH_HOST_DEVICE
   T abs(const complex_base<T> &val) {
     return hypot(val.real(), val.imag());
   }
   
   template<typename T> 
-  __inline__ __host__ __device__
+  CUMATH_HOST_DEVICE
   T arg(const complex_base<T> &val) {
-    return atran2(val.imag(), val.real());
+    return atan2(val.imag(), val.real());
   }
   
   template<typename T> 
-  __inline__ __host__ __device__
+  CUMATH_HOST_DEVICE
   T sgn(const complex_base<T> &val) {
     return 0<val.real() or (0==val.real() and 0<=val.imag()) ? T(1) : T(-1); 
   }
   
   template<typename T> 
-  __inline__ __host__ __device__
+  CUMATH_HOST_DEVICE
   T norm(const complex_base<T> &val) {
     return val.real()*val.real()+val.imag()*val.imag();
   }
   
   template<typename T> 
-  __inline__ __host__ __device__
+  CUMATH_HOST_DEVICE
   complex_base<T> polar(const T &r, const T &phi) {
     return complex_base<T>(r*cos(phi), r*sin(phi));
   }
 
   template<typename T> 
-  __inline__ __host__ __device__
+  CUMATH_HOST_DEVICE
   complex_base<T> conj(const complex_base<T> &x) {
     return complex_base<T>(x.real(), -x.imag());
   }
 
   template<typename T> 
-  __inline__ __host__ __device__
+  CUMATH_HOST_DEVICE
   complex_base<T> proj(const complex_base<T> &x) {
     return (isinf(x.real()) or isinf(x.imag())) ? complex_base<T>(T(1)/T(0), copysign(T(0), x.imag)) : x;
   }
   
   template<typename T> 
-  __inline__ __host__ __device__
+  CUMATH_HOST_DEVICE
   complex_base<T> sin(const complex_base<T> &x) {
     return complex_base<T>(sin(x.real())*cosh(x.imag()), +cos(x.real)*sinh(x.imag()));
   }
   
   template<typename T> 
-  __inline__ __host__ __device__
+  CUMATH_HOST_DEVICE
   complex_base<T> sinh(const complex_base<T> &x) {
     return complex_base<T>(sinh(x.real())*cos(x.imag()), +cosh(x.real)*sin(x.imag()));
   }
 
   template<typename T> 
-  __inline__ __host__ __device__
+  CUMATH_HOST_DEVICE
   complex_base<T> cos(const complex_base<T> &x) {
     return complex_base<T>(cos(x.real())*cosh(x.imag()), -sin(x.real)*sinh(x.imag()));
   }
   
   template<typename T> 
-  __inline__ __host__ __device__
+  CUMATH_HOST_DEVICE
   complex_base<T> cosh(const complex_base<T> &x) {
     return complex_base<T>(cosh(x.real())*cos(x.imag()), -sinh(x.real)*sin(x.imag()));
   }
   
   template<typename T> 
-  __inline__ __host__ __device__
+  CUMATH_HOST_DEVICE
   complex_base<T> tan(const complex_base<T> &x) {
     T sr(sin(x.real()));
     T cr(cos(x.real()));
@@ -368,7 +371,7 @@ namespace cumath {
   }
   
   template<typename T> 
-  __inline__ __host__ __device__
+  CUMATH_HOST_DEVICE
   complex_base<T> tanh(const complex_base<T> &x) {
     T shr(sinh(x.real()));
     T chr(cosh(x.real()));
@@ -379,7 +382,7 @@ namespace cumath {
   }
   
   template<typename T> 
-  __inline__ __host__ __device__
+  CUMATH_HOST_DEVICE
   complex_base<T> exp(const complex_base<T> &x) {
     T er(exp(x.real()));
     T ci(cos(x.imag()));
@@ -388,26 +391,26 @@ namespace cumath {
   }
   
   template<typename T> 
-  __inline__ __host__ __device__
+  CUMATH_HOST_DEVICE
   complex_base<T> log(const complex_base<T> &x) {
     return complex_base<T>(log(x.real()*x.real())/T(2), atan2(x.imag(), x.real()));
   }
   
   template<typename T> 
-  __inline__ __host__ __device__
+  CUMATH_HOST_DEVICE
   complex_base<T> log10(const complex_base<T> &x) {
     static const T c_log10(log(T(10)));
     return complex_base<T>(log(x.real()*x.real())/T(2)/c_log10, atan2(x.imag(), x.real())/c_log10);
   }
   
   template<typename T> 
-  __inline__ __host__ __device__
+  CUMATH_HOST_DEVICE
   complex_base<T> pow(const complex_base<T> &x, const complex_base<T> &y) {
     return exp(y*log(x));
   }
 
   template<typename T> 
-  __inline__ __host__ __device__
+  CUMATH_HOST_DEVICE
   complex_base<T> sqrt(const complex_base<T> &z) {
     T x(z.real()), y(z.imag());
     if (x==T(0)) {
@@ -421,7 +424,7 @@ namespace cumath {
   }
 
   template<typename T> 
-  __inline__ __host__ __device__
+  CUMATH_HOST_DEVICE
   complex_base<T> asin(const complex_base<T> &z) {
     T r2(z.real()*z.real());
     T i2(z.imag()*z.imag());
@@ -438,7 +441,7 @@ namespace cumath {
   }
   
   template<typename T> 
-  __inline__ __host__ __device__
+  CUMATH_HOST_DEVICE
   complex_base<T> asinh(const complex_base<T> &z) {
     T r2(z.real()*z.real());
     T i2(z.imag()*z.imag());
@@ -455,7 +458,7 @@ namespace cumath {
   }
   
   template<typename T> 
-  __inline__ __host__ __device__
+  CUMATH_HOST_DEVICE
   complex_base<T> acos(const complex_base<T> &z) {
     T r2(z.real()*z.real());
     T i2(z.imag()*z.imag());
@@ -472,7 +475,7 @@ namespace cumath {
   }
   
   template<typename T> 
-  __inline__ __host__ __device__
+  CUMATH_HOST_DEVICE
   complex_base<T> acosh(const complex_base<T> &z) {
     T r2(z.real()*z.real());
     T i2(z.imag()*z.imag());
@@ -490,7 +493,7 @@ namespace cumath {
   }
 
   template<typename T> 
-  __inline__ __host__ __device__
+  CUMATH_HOST_DEVICE
   complex_base<T> atan(const complex_base<T> &z) {
     T r2(z.real()*z.real());
     T i2(z.imag()*z.imag());
@@ -505,7 +508,7 @@ namespace cumath {
   }
 
   template<typename T> 
-  __inline__ __host__ __device__
+  CUMATH_HOST_DEVICE
   complex_base<T> atanh(const complex_base<T> &z) {
     T r2(z.real()*z.real());
     T i2(z.imag()*z.imag());
@@ -556,22 +559,22 @@ namespace cumath {
     s << '(' << z.real() << ',' << z.imag() << ')';
     return out << s.str();
   }
-  
-  template<typename T>
-  class complex;
-  
+    
   template<typename T>
   class complex : public complex_base<T> {
     typedef complex_base<T> base;
   public:
-    __inline__ __host__ __device__
+    CUMATH_HOST_DEVICE
     complex() : base() {
     }
-    __inline__ __host__ __device__
+    CUMATH_HOST_DEVICE
     complex(const T &r) : base(r) {
     }
-    __inline__ __host__ __device__
+    CUMATH_HOST_DEVICE
     complex(const T &r, const T &i) : base(r, i) {
+    }
+    CUMATH_HOST_DEVICE
+    complex(const complex_base<T> &other) : base(other.real(), other.imag()) {
     }
     
   };
@@ -580,20 +583,20 @@ namespace cumath {
   class complex<double> : public complex_base<double> {
     typedef complex_base<double> base;
   public:
-    __inline__ __host__ __device__
+    CUMATH_HOST_DEVICE
     complex() : base() {
     }
-    __inline__ __host__ __device__
+    CUMATH_HOST_DEVICE
     complex(const double &r) : base(r) {
     }
-    __inline__ __host__ __device__
+    CUMATH_HOST_DEVICE
     complex(const double &r, const double &i) : base(r, i) {
     }
-    __inline__ __host__ __device__
-    complex(const complex_base<float> &other) : base(static_cast<double>(other.real()), static_cast<double>(other.imag())) {
+    CUMATH_HOST_DEVICE
+    complex(const complex_base<double> &other) : base(other.real(), other.imag()) {
     }
-    __inline__ __host__ __device__
-    complex(const complex_base<double> &other) : base(static_cast<double>(other.real()), static_cast<double>(other.imag())) {
+    CUMATH_HOST_DEVICE
+    complex(const complex_base<float> &other) : base(static_cast<double>(other.real()), static_cast<double>(other.imag())) {
     }
   };
   

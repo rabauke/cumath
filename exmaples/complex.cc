@@ -1,8 +1,10 @@
 // compile with:
 // nvcc -o complex -x cu -arch=compute_20 -I .. complex.cc
+// g++ -o complex -I .. complex.cc
 
 #include <cstdlib>
 #include <iostream>
+#include <cumath/math.hpp>
 #include <cumath/complex.hpp>
 
 int main() {
