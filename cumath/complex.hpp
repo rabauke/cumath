@@ -55,7 +55,7 @@ namespace cumath {
     typedef T value_type;
     CUMATH_HOST_DEVICE
     complex_base() {
-#if !(defined __CUDACC__)
+#if !(defined __CUDA_ARCH__)
       x[0]=T(0);
       x[1]=T(0);
 #endif
