@@ -34,12 +34,10 @@
 
 #define CUMATH_MATH_HPP
 
-#if defined __NVCC__
-  #include <cuda_runtime.h>
-  #define CUMATH_HOST_DEVICE __inline__ __host__ __device__
-#else 
-  #include <cmath>
-  #define CUMATH_HOST_DEVICE inline
+#include <cumath/cuda.hpp>
+
+#if !(defined __NVCC__)
+#include <cmath>
 #endif
 
 // see http://www.cplusplus.com/reference/cmath/

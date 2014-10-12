@@ -1,84 +1,63 @@
-// compile with
-// nvcc -o vector -O3 -x cu -arch=compute_20 -I .. vector.c
-#include <thrust/host_vector.h>
-#include <thrust/device_vector.h>
-#include <thrust/copy.h>
-#include <thrust/inner_product.h>
-#include <thrust/functional.h>
-#include <iostream>
 #include <cstdlib>
-#include <cumath/math.hpp>
+#include <iostream>
+#include <vector>
+#include <cumath/allocator.hpp>
+#include <cumath/vector.hpp>
 #include <cumath/complex.hpp>
-#include "timer.hpp"
 
-typedef double real_t;
-typedef cumath::complex<real_t> complex_t;
-
-
-namespace thrust {
-
-  template<typename T>
-  struct conj_multiplies : public binary_function<T, T, T> {
-    __host__ __device__ T operator()(const T &x, const T &y) const {
-      return complex_t(x.real()*y.real()+x.imag()*y.imag(),
-		       x.real()*y.imag()-x.imag()*y.real());
-    }
-  };
-  
+template<typename T, typename view>
+__global__ void mult(T factor, view v) {
+  typename view::size_type j=blockIdx.x*blockDim.x+threadIdx.x;
+  if (j<v.size())
+    v[j]*=factor;
 }
-
-
-inline
-complex_t inner_product(const thrust::device_vector<complex_t> &x,
-			const thrust::device_vector<complex_t> &y) {
-  return
-    thrust::inner_product(x.begin(), x.end(), y.begin(), 
-			  complex_t(0, 0), 
-			  thrust::plus<complex_t>(), 
-			  thrust::conj_multiplies<complex_t>());
-}
-
 
 int main() {
-  int N=1024*1024*8;
-  thrust::host_vector<complex_t> Xh(N);
-  thrust::host_vector<complex_t> Yh(N);
-  for (int i(0); i<N; ++i) {
-    real_t re(static_cast<real_t>(std::rand())/RAND_MAX);
-    real_t im(static_cast<real_t>(std::rand())/RAND_MAX);
-    re=2*re-1;
-    im=2*im-1;
-    Xh[i]=complex_t(re, im);
-    re=static_cast<real_t>(std::rand())/RAND_MAX;
-    im=static_cast<real_t>(std::rand())/RAND_MAX;
-    re=2*re-1;
-    im=2*im-1;
-    Yh[i]=complex_t(re, im);
-  }
-  thrust::device_vector<complex_t> Xd(N);
-  thrust::device_vector<complex_t> Yd(N);
-  thrust::copy(Xh.begin(), Xh.end(), Xd.begin());
-  thrust::copy(Yh.begin(), Yh.end(), Yd.begin());
+  typedef cumath::complex<double> complex;
   {
-    cudaEvent_t start, stop;
-    cudaEventCreate(&start);
-    cudaEventCreate(&stop);
-    cudaEventRecord(start, 0);
-    timer::timer T;
-    complex_t dsum(inner_product(Xd, Yd));
-    cudaEventRecord(stop, 0);
-    cudaEventSynchronize(stop);
-    float elapsedTime;
-    cudaEventElapsedTime(&elapsedTime, start, stop);
-    std::cout << dsum << '\t' << T.time() << '\t' << elapsedTime/1000 << '\n';
+    std::size_t n(1234);
+    std::vector<complex> v1(n);
+    for (int i(0); i<n; ++i) 
+      v1[i]=complex(i, -i);
+    cumath::vector<complex> v2(n);
+    cumath::copy(v1.begin(), v1.end(), v2.begin());
+    int threads_per_block=512;
+    int blocks=(n+threads_per_block-1)/threads_per_block;
+    mult<<<blocks, threads_per_block>>>(complex(2, 0), v2.view());
+    cumath::vector<complex> v3(v2);
+    cumath::copy(v3.begin(), v3.end(), v1.begin());
+    for (std::size_t i(0); i<n; ++i) 
+      std::cout << v1[i] << '\n';
   }
+
   {
-    timer::timer T;
-    complex_t hsum(0, 0);
-    for (int i(0); i<N; ++i)
-      hsum+=complex_t(Xh[i].real()*Yh[i].real()+Xh[i].imag()*Yh[i].imag(),
-		      Xh[i].real()*Yh[i].imag()-Xh[i].imag()*Yh[i].real());
-    std::cout << hsum << '\t' << T.time() << '\n';
+    std::size_t n(1234);
+    std::vector<complex> v1(n);
+    for (int i(0); i<n; ++i) 
+      v1[i]=complex(i, -i);
+    cumath::vector<complex, cumath::page_locked_allocator<complex> > v2(n);
+    cumath::copy(v1.begin(), v1.end(), v2.begin());
+    int threads_per_block=512;
+    int blocks=(n+threads_per_block-1)/threads_per_block;
+    mult<<<blocks, threads_per_block>>>(complex(3, 0), v2.view());
+    cumath::vector<complex, cumath::page_locked_allocator<complex> > v3(v2);
+    cumath::copy(v3.begin(), v3.end(), v1.begin());
+    for (std::size_t i(0); i<n; ++i) 
+      std::cout << v1[i] << '\n';
   }
-  return 0;
+
+  {
+    std::size_t n(1234);
+    cumath::vector<complex, cumath::managed_allocator<complex> > v1(n);
+    for (int i(0); i<n; ++i)
+      v1[i]=complex(i, -i);
+    int threads_per_block=512;
+    int blocks=(n+threads_per_block-1)/threads_per_block;
+    mult<<<blocks, threads_per_block>>>(complex(4, 0), v1.view());
+    cudaDeviceSynchronize();
+    for (std::size_t i(0); i<n; ++i) 
+      std::cout << v1[i] << '\n';
+  }
+  
+  return EXIT_SUCCESS;
 }

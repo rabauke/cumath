@@ -38,6 +38,7 @@
 #include <ostream>
 #include <istream>
 #include <sstream>
+#include <cumath/cuda.hpp>
 #include <cumath/math.hpp>
 
 // see http://www.cplusplus.com/reference/cmath/
@@ -599,7 +600,27 @@ namespace cumath {
     complex(const complex_base<float> &other) : base(static_cast<double>(other.real()), static_cast<double>(other.imag())) {
     }
   };
-  
+
+  //--------------------------------------------------------------------
+
+  template<typename T>
+  struct complex_traits;
+
+  template<typename T>
+  struct complex_traits<complex<T> > {
+    typedef T real_type;
+  };
+
+  template<>
+  struct complex_traits<float> {
+    typedef float real_type;
+  };
+
+  template<>
+  struct complex_traits<double> {
+    typedef double real_type;
+  };
+
 }
 
 #endif
